@@ -19,8 +19,6 @@ static Mat4 modelMatrix, projectionMatrix, viewMatrix;
 
 static float angleY = 0, angleZ = 0;
 
-static const bool USE_ILUMINATION = false;
-
 static float ambientLight[] = {0.5, 0.5, 0.5};
 static float materialAmbient[] = {0.0, 0.0, 1.0};
 
@@ -33,17 +31,7 @@ static float observerX = 0, observerZ = 0;
 static float cameraSpeed = 0.05;
 
 static void initShaders() {
-	GLuint vShader;
-	if (USE_ILUMINATION)
-	{
-		vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
-	}
-	else
-	{
-		vShader = compileShader("shaders/modelPosition.vsh",
-				GL_VERTEX_SHADER);
-	}
-
+	GLuint vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
 	if (!shaderCompiled(vShader))
 	{
 		return;
@@ -68,26 +56,23 @@ static void initShaders() {
 	modelMatrixLoc = glGetUniformLocation(programId,"modelMatrix");
 	viewMatrixLoc = glGetUniformLocation(programId,"viewMatrix");
 	projectionMatrixLoc = glGetUniformLocation(programId,"projectionMatrix");
-	
-	if (USE_ILUMINATION)
-	{
-		ambientLightLoc = glGetUniformLocation(programId, "ambientLight");
-		diffuseLightLoc = glGetUniformLocation(programId, "diffuseLight");
-		lightPositionLoc = glGetUniformLocation(programId, "lightPosition");
-		materialALoc = glGetUniformLocation(programId, "materialA");
-		materialDLoc = glGetUniformLocation(programId, "materialD");
-		materialSLoc = glGetUniformLocation(programId, "materialS");
-		exponentLoc = glGetUniformLocation(programId, "exponent");
-		cameraLoc = glGetUniformLocation(programId, "camera");
 
-		glUniform3fv(ambientLightLoc, 1, ambientLight);
-		glUniform3fv(diffuseLightLoc, 1, diffuseLight);
-		glUniform3fv(lightPositionLoc, 1, lightPosition);
-		glUniform3fv(materialALoc, 1, materialAmbient);
-		glUniform3fv(materialDLoc, 1, materialDiffuse);
-		glUniform3fv(materialSLoc, 1, materialSpecular);
-		glUniform1f(exponentLoc, exponent);
-	}
+	ambientLightLoc = glGetUniformLocation(programId, "ambientLight");
+	diffuseLightLoc = glGetUniformLocation(programId, "diffuseLight");
+	lightPositionLoc = glGetUniformLocation(programId, "lightPosition");
+	materialALoc = glGetUniformLocation(programId, "materialA");
+	materialDLoc = glGetUniformLocation(programId, "materialD");
+	materialSLoc = glGetUniformLocation(programId, "materialS");
+	exponentLoc = glGetUniformLocation(programId, "exponent");
+	cameraLoc = glGetUniformLocation(programId, "camera");
+
+	glUniform3fv(ambientLightLoc, 1, ambientLight);
+	glUniform3fv(diffuseLightLoc, 1, diffuseLight);
+	glUniform3fv(lightPositionLoc, 1, lightPosition);
+	glUniform3fv(materialALoc, 1, materialAmbient);
+	glUniform3fv(materialDLoc, 1, materialDiffuse);
+	glUniform3fv(materialSLoc, 1, materialSpecular);
+	glUniform1f(exponentLoc, exponent);
 	
 	glEnable(GL_DEPTH_TEST);
 
