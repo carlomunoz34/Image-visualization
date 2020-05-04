@@ -137,3 +137,6 @@ local.properties
 .history
 
 # End of https://www.gitignore.io/api/c,eclipse,visualstudiocode
+
+makefile
+image
