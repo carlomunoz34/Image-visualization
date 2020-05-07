@@ -5,6 +5,8 @@
 #include "libs/Transforms.h"
 #include <map>
 
+#include "libs/image.h"
+
 std::map<char, bool> keyMap;
 
 static GLuint programId;
@@ -137,6 +139,26 @@ static void keyReleasedFunc(unsigned char key, int x, int y)
 }
 
 int main(int argc, char **argv) {
+	std::string path = "cat.36.jpg";
+	Image img(&path[0]);
+
+	printf("[\n");
+	for (int i = 0; i < img.height; i++)
+	{
+		printf("[");
+		for (int j = 0; j < img.width; j++)
+		{
+			printf("[");
+			for (int k = 0; k < img.channels; k++)
+			{
+				printf("%u, ", img.get(i, j, k));
+			}
+			printf("],\n");
+		}
+		printf("],\n");
+	}
+	printf("]\n");
+
 	setbuf(stdout, NULL);
 	glutInit(&argc, argv);
 
@@ -154,5 +176,6 @@ int main(int argc, char **argv) {
 	initShaders();
 	glClearColor(0, 0, 0, 1.0);
 	glutMainLoop();
+
 	return 0;
 }
