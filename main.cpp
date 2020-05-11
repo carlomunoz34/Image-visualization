@@ -10,6 +10,7 @@
 #include "libs/image.h"
 
 #define toRadians(deg) deg * M_PI / 180.0
+std::string path = "cat.3.jpg";
 
 std::map<char, bool> keyMap;
 
@@ -38,7 +39,7 @@ static float materialDiffuse[] = {0.6, 0.6, 0.6};
 static float materialSpecular[] = {0.7, 0.7, 0.7};
 static float exponent = 16;
 */
-static float cameraSpeed = 0.05;
+static float cameraSpeed = 0.1;
 static float cameraX = 0;
 static float cameraZ = 5;
 
@@ -52,7 +53,7 @@ std::vector<float> vertexes;
 std::vector<float> colors;
 std::vector<float> normals;
 std::vector<GLuint> indexes;
-const float START_Z = -20;
+const float START_Z = -100;
 
 // This scalar multiplies the grey value so the image can have
 // a more notorius relief.
@@ -216,15 +217,17 @@ void onMouseMove(int x, int y)
 
 static void createImage(Image img)
 {
-	float x = 0;//-(img.width / 2.0);
-	float y = 0;//(img.height / 2.0);
+	// Separation between each vertex
+	const float SEPARATION = 0.1;
+	float x = -(img.width / 2.0) * SEPARATION;
+	float y = (img.height / 2.0) * SEPARATION;
 
 	int i = 0, j = 0;
 
-	for (i = 0; i < img.height; i++, y -= 0.1)
+	for (i = 0; i < img.height; i++, y -= SEPARATION)
 	{
-		x = 0;
-		for (j = 0; j < img.width; j++, x += 0.1)
+		x = -(img.width / 2.0) * SEPARATION;
+		for (j = 0; j < img.width; j++, x += SEPARATION)
 		{
 			float red, green, blue, grey;
 			red = img.get(i, j, 0) / 255.0;
@@ -300,7 +303,6 @@ static void createImage(Image img)
 }
 
 int main(int argc, char **argv) {
-	std::string path = "0010.png";
 	Image img(&path[0]);
 
 	glutInit(&argc, argv);
