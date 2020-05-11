@@ -16,7 +16,7 @@ std::map<char, bool> keyMap;
 typedef float vec3[3];
 
 const float CAMERA_ROTATION_SPEED = 0.5;
-const int RESET = INT32_MAX;
+const unsigned RESET = UINT32_MAX;
 
 static GLuint programId;
 
@@ -51,7 +51,7 @@ int const MARGIN = 10;
 std::vector<float> vertexes;
 std::vector<float> colors;
 std::vector<float> normals;
-std::vector<int> indexes;
+std::vector<GLuint> indexes;
 const float START_Z = -20;
 
 static void initShaders() {
@@ -143,9 +143,9 @@ static void displayFunc()
 	glUniformMatrix4fv(modelMatrixLoc, 1, true, modelMatrix.values);
 
 	glBindVertexArray(vertexArrayId);
-	glDrawArrays(GL_POINTS, 0, vertexes.size() * sizeof(float));
+	//glDrawArrays(GL_POINTS, 0, vertexes.size() * sizeof(float));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId[2]);
-	//glDrawElements(GL_LINE_STRIP, indexes.size() * sizeof(int), GL_INT, 0);
+	glDrawElements(GL_TRIANGLE_STRIP, indexes.size(), GL_UNSIGNED_INT, 0);
 
 	glutSwapBuffers();
 }
@@ -213,8 +213,6 @@ void onMouseMove(int x, int y)
 
 static void createImage(Image img)
 {
-	glPointSize(5);
-
 	float x = 0;//-(img.width / 2.0);
 	float y = 0;//(img.height / 2.0);
 
@@ -247,16 +245,16 @@ static void createImage(Image img)
 	{
 		for (int j = 0; j < img.width; j++)
 		{
-			indexes.push_back((GLint) (i * img.width + j));
-			indexes.push_back((GLint) ((i + 1) * img.width + j));
+			indexes.push_back((GLuint) (i * img.width + j));
+			indexes.push_back((GLuint) ((i + 1) * img.width + j));
 		}
-		indexes.push_back(RESET);
+		indexes.push_back((GLuint) RESET);
 	}
 
 	glGenVertexArrays(1, &vertexArrayId);
     glBindVertexArray(vertexArrayId);
 
-    glGenBuffers(4, bufferId);
+    glGenBuffers(3, bufferId);
 
 	// Positions
     glBindBuffer(GL_ARRAY_BUFFER, bufferId[0]);
@@ -274,7 +272,7 @@ static void createImage(Image img)
 
 	// Indexes
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId[2]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(GLint),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(GLuint),
             &indexes[0], GL_STATIC_DRAW);
 
 /*
