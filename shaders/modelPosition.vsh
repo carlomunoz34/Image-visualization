@@ -12,6 +12,6 @@ out vec3 colorToFragment;
 void main() {
   gl_Position = projectionMatrix * viewMatrix * modelMatrix *
                 vec4(vertexPosition, 1);
-  colorToFragment = modelColor;
-  //colorToFragment = vec3(1, 1, 1);
+  //colorToFragment = modelColor;
+  colorToFragment = vec3(1, 1, 1);
 }
