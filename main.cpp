@@ -54,6 +54,10 @@ std::vector<float> normals;
 std::vector<GLuint> indexes;
 const float START_Z = -20;
 
+// This scalar multiplies the grey value so the image can have
+// a more notorius relief.
+const float SCALAR = 5;
+
 static void initShaders() {
 	//GLuint vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
 	GLuint vShader = compileShader("shaders/modelPosition.vsh", GL_VERTEX_SHADER);
@@ -143,7 +147,6 @@ static void displayFunc()
 	glUniformMatrix4fv(modelMatrixLoc, 1, true, modelMatrix.values);
 
 	glBindVertexArray(vertexArrayId);
-	//glDrawArrays(GL_POINTS, 0, vertexes.size() * sizeof(float));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId[2]);
 	glDrawElements(GL_TRIANGLE_STRIP, indexes.size(), GL_UNSIGNED_INT, 0);
 
@@ -223,15 +226,22 @@ static void createImage(Image img)
 		x = 0;
 		for (j = 0; j < img.width; j++, x += 0.1)
 		{
+			float red, green, blue, grey;
+			red = img.get(i, j, 0) / 255.0;
+			green = img.get(i, j, 1) / 255.0;
+			blue = img.get(i, j, 2) / 255.0;
+
+			grey = (red + green + blue) / 3;
+
 			// Add vertexes
 			vertexes.push_back(x);
 			vertexes.push_back(y);
-			vertexes.push_back(START_Z);
+			vertexes.push_back(START_Z + (grey * SCALAR));
 
 			// Add colors
-			colors.push_back(img.get(i, j, 0) / 255.0);
-			colors.push_back(img.get(i, j, 1) / 255.0);
-			colors.push_back(img.get(i, j, 2) / 255.0);
+			colors.push_back(red);
+			colors.push_back(green);
+			colors.push_back(blue);
 
 			// Add normals
 			normals.push_back(0);
