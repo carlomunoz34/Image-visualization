@@ -30,7 +30,7 @@ static Mat4 modelMatrix, projectionMatrix, viewMatrix;
 
 static GLuint ambientLightLoc, diffuseLightLoc, lightPositionLoc;
 static GLuint materialALoc, materialDLoc, materialSLoc, exponentLoc, cameraLoc;
-/*
+
 static float ambientLight[] = {0.5, 0.5, 0.5};
 static float materialAmbient[] = {0.0, 0.0, 1.0};
 static float diffuseLight[] = {1.0, 1.0, 1.0};
@@ -38,7 +38,7 @@ static float lightPosition[] = {0.0, 0.0, 1};
 static float materialDiffuse[] = {0.6, 0.6, 0.6};
 static float materialSpecular[] = {0.7, 0.7, 0.7};
 static float exponent = 16;
-*/
+
 static float cameraSpeed = 0.1;
 static float cameraX = 0;
 static float cameraZ = 5;
@@ -60,8 +60,8 @@ const float START_Z = -100;
 const float SCALAR = 5;
 
 static void initShaders() {
-	//GLuint vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
-	GLuint vShader = compileShader("shaders/modelPosition.vsh", GL_VERTEX_SHADER);
+	GLuint vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
+	//GLuint vShader = compileShader("shaders/modelPosition.vsh", GL_VERTEX_SHADER);
 	if (!shaderCompiled(vShader))
 	{
 		return;
@@ -82,21 +82,21 @@ static void initShaders() {
 
 	vertexPositionLoc = glGetAttribLocation(programId,"vertexPosition");
 	modelColorLoc = glGetAttribLocation(programId,"modelColor");
-	//vertexNormalLoc = glGetAttribLocation(programId, "vertexNormal");
+	vertexNormalLoc = glGetAttribLocation(programId, "vertexNormal");
 	
 	modelMatrixLoc = glGetUniformLocation(programId,"modelMatrix");
 	viewMatrixLoc = glGetUniformLocation(programId,"viewMatrix");
 	projectionMatrixLoc = glGetUniformLocation(programId,"projectionMatrix");
 
-	/*
 	ambientLightLoc = glGetUniformLocation(programId, "ambientLight");
 	diffuseLightLoc = glGetUniformLocation(programId, "diffuseLight");
 	lightPositionLoc = glGetUniformLocation(programId, "lightPosition");
+	cameraLoc = glGetUniformLocation(programId, "cameraPosition");
+	exponentLoc = glGetUniformLocation(programId, "exponent");
 	materialALoc = glGetUniformLocation(programId, "materialA");
 	materialDLoc = glGetUniformLocation(programId, "materialD");
 	materialSLoc = glGetUniformLocation(programId, "materialS");
-	exponentLoc = glGetUniformLocation(programId, "exponent");
-	cameraLoc = glGetUniformLocation(programId, "camera");
+
 	glUniform3fv(ambientLightLoc, 1, ambientLight);
 	glUniform3fv(diffuseLightLoc, 1, diffuseLight);
 	glUniform3fv(lightPositionLoc, 1, lightPosition);
@@ -104,7 +104,6 @@ static void initShaders() {
 	glUniform3fv(materialDLoc, 1, materialDiffuse);
 	glUniform3fv(materialSLoc, 1, materialSpecular);
 	glUniform1f(exponentLoc, exponent);
-	*/
 
 	keyMap['w'] = false;
 	keyMap['s'] = false;
@@ -135,6 +134,9 @@ static void displayFunc()
 	}
 
 	glUseProgram(programId);
+
+	glUniform3f(cameraLoc, cameraX, 0, cameraZ);
+
 	glUniformMatrix4fv(projectionMatrixLoc, 1, true, projectionMatrix.values);
 	mIdentity(&viewMatrix);
 
@@ -288,14 +290,12 @@ static void createImage(Image img)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(GLuint),
             &indexes[0], GL_STATIC_DRAW);
 
-/*
 	// Normals
     glBindBuffer(GL_ARRAY_BUFFER, bufferId[3]);
     glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float),
             &normals[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, 0, 0, 0);
+    glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(vertexNormalLoc);
-	*/
 
 	glPrimitiveRestartIndex(RESET);
     glEnable(GL_PRIMITIVE_RESTART);
