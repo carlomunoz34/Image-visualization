@@ -10,6 +10,7 @@
 #include "libs/image.h"
 
 #define toRadians(deg) deg * M_PI / 180.0
+std::string path = "cat.3.jpg";
 
 std::map<char, bool> keyMap;
 
@@ -29,7 +30,7 @@ static Mat4 modelMatrix, projectionMatrix, viewMatrix;
 
 static GLuint ambientLightLoc, diffuseLightLoc, lightPositionLoc;
 static GLuint materialALoc, materialDLoc, materialSLoc, exponentLoc, cameraLoc;
-/*
+
 static float ambientLight[] = {0.5, 0.5, 0.5};
 static float materialAmbient[] = {0.0, 0.0, 1.0};
 static float diffuseLight[] = {1.0, 1.0, 1.0};
@@ -37,8 +38,8 @@ static float lightPosition[] = {0.0, 0.0, 1};
 static float materialDiffuse[] = {0.6, 0.6, 0.6};
 static float materialSpecular[] = {0.7, 0.7, 0.7};
 static float exponent = 16;
-*/
-static float cameraSpeed = 0.05;
+
+static float cameraSpeed = 0.1;
 static float cameraX = 0;
 static float cameraZ = 5;
 
@@ -52,15 +53,15 @@ std::vector<float> vertexes;
 std::vector<float> colors;
 std::vector<float> normals;
 std::vector<GLuint> indexes;
-const float START_Z = -20;
+const float START_Z = -100;
 
 // This scalar multiplies the grey value so the image can have
 // a more notorius relief.
 const float SCALAR = 5;
 
 static void initShaders() {
-	//GLuint vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
-	GLuint vShader = compileShader("shaders/modelPosition.vsh", GL_VERTEX_SHADER);
+	GLuint vShader = compileShader("shaders/gouraud.vsh", GL_VERTEX_SHADER);
+	//GLuint vShader = compileShader("shaders/modelPosition.vsh", GL_VERTEX_SHADER);
 	if (!shaderCompiled(vShader))
 	{
 		return;
@@ -81,21 +82,21 @@ static void initShaders() {
 
 	vertexPositionLoc = glGetAttribLocation(programId,"vertexPosition");
 	modelColorLoc = glGetAttribLocation(programId,"modelColor");
-	//vertexNormalLoc = glGetAttribLocation(programId, "vertexNormal");
+	vertexNormalLoc = glGetAttribLocation(programId, "vertexNormal");
 	
 	modelMatrixLoc = glGetUniformLocation(programId,"modelMatrix");
 	viewMatrixLoc = glGetUniformLocation(programId,"viewMatrix");
 	projectionMatrixLoc = glGetUniformLocation(programId,"projectionMatrix");
 
-	/*
 	ambientLightLoc = glGetUniformLocation(programId, "ambientLight");
 	diffuseLightLoc = glGetUniformLocation(programId, "diffuseLight");
 	lightPositionLoc = glGetUniformLocation(programId, "lightPosition");
+	cameraLoc = glGetUniformLocation(programId, "cameraPosition");
+	exponentLoc = glGetUniformLocation(programId, "exponent");
 	materialALoc = glGetUniformLocation(programId, "materialA");
 	materialDLoc = glGetUniformLocation(programId, "materialD");
 	materialSLoc = glGetUniformLocation(programId, "materialS");
-	exponentLoc = glGetUniformLocation(programId, "exponent");
-	cameraLoc = glGetUniformLocation(programId, "camera");
+
 	glUniform3fv(ambientLightLoc, 1, ambientLight);
 	glUniform3fv(diffuseLightLoc, 1, diffuseLight);
 	glUniform3fv(lightPositionLoc, 1, lightPosition);
@@ -103,7 +104,6 @@ static void initShaders() {
 	glUniform3fv(materialDLoc, 1, materialDiffuse);
 	glUniform3fv(materialSLoc, 1, materialSpecular);
 	glUniform1f(exponentLoc, exponent);
-	*/
 
 	keyMap['w'] = false;
 	keyMap['s'] = false;
@@ -134,6 +134,9 @@ static void displayFunc()
 	}
 
 	glUseProgram(programId);
+
+	glUniform3f(cameraLoc, cameraX, 0, cameraZ);
+
 	glUniformMatrix4fv(projectionMatrixLoc, 1, true, projectionMatrix.values);
 	mIdentity(&viewMatrix);
 
@@ -216,15 +219,17 @@ void onMouseMove(int x, int y)
 
 static void createImage(Image img)
 {
-	float x = 0;//-(img.width / 2.0);
-	float y = 0;//(img.height / 2.0);
+	// Separation between each vertex
+	const float SEPARATION = 0.1;
+	float x = -(img.width / 2.0) * SEPARATION;
+	float y = (img.height / 2.0) * SEPARATION;
 
 	int i = 0, j = 0;
 
-	for (i = 0; i < img.height; i++, y -= 0.1)
+	for (i = 0; i < img.height; i++, y -= SEPARATION)
 	{
-		x = 0;
-		for (j = 0; j < img.width; j++, x += 0.1)
+		x = -(img.width / 2.0) * SEPARATION;
+		for (j = 0; j < img.width; j++, x += SEPARATION)
 		{
 			float red, green, blue, grey;
 			red = img.get(i, j, 0) / 255.0;
@@ -285,14 +290,12 @@ static void createImage(Image img)
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.size() * sizeof(GLuint),
             &indexes[0], GL_STATIC_DRAW);
 
-/*
 	// Normals
     glBindBuffer(GL_ARRAY_BUFFER, bufferId[3]);
     glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float),
             &normals[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, 0, 0, 0);
+    glVertexAttribPointer(vertexNormalLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(vertexNormalLoc);
-	*/
 
 	glPrimitiveRestartIndex(RESET);
     glEnable(GL_PRIMITIVE_RESTART);
@@ -300,7 +303,6 @@ static void createImage(Image img)
 }
 
 int main(int argc, char **argv) {
-	std::string path = "0010.png";
 	Image img(&path[0]);
 
 	glutInit(&argc, argv);
