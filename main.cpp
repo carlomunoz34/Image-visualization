@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -6,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <math.h>
+
 
 #include "libs/image.h"
 
@@ -20,7 +22,7 @@ const float CAMERA_ROTATION_SPEED = 0.5;
 const unsigned RESET = UINT32_MAX;
 
 static GLuint programId;
-
+static GLuint cubeVA;
 static GLuint vertexArrayId;
 static GLuint bufferId[4];
 
@@ -32,7 +34,7 @@ static GLuint ambientLightLoc, diffuseLightLoc, lightPositionLoc;
 static GLuint materialALoc, materialDLoc, materialSLoc, exponentLoc, cameraLoc;
 
 static float ambientLight[] = {0.5, 0.5, 0.5};
-static float materialAmbient[] = {0.0, 0.0, 1.0};
+static float materialAmbient[] = {1.0, 1.0, 1.0};
 static float diffuseLight[] = {1.0, 1.0, 1.0};
 static float lightPosition[] = {0.0, 0.0, 1};
 static float materialDiffuse[] = {0.6, 0.6, 0.6};
@@ -41,10 +43,13 @@ static float exponent = 16;
 
 static float cameraSpeed = 0.1;
 static float cameraX = 0;
-static float cameraZ = 5;
+static float cameraZ = 15;
 
 static float mouseDiffX = 0;
 static float mouseDiffY = 0;
+
+static float cameraAngleX = 0;
+static float cameraAngleY = 0;
 
 bool firstMove = true;
 int const MARGIN = 10;
@@ -53,7 +58,7 @@ std::vector<float> vertexes;
 std::vector<float> colors;
 std::vector<float> normals;
 std::vector<GLuint> indexes;
-const float START_Z = -100;
+const float START_Z = 0;
 
 // This scalar multiplies the grey value so the image can have
 // a more notorius relief.
@@ -83,7 +88,7 @@ static void initShaders() {
 	vertexPositionLoc = glGetAttribLocation(programId,"vertexPosition");
 	modelColorLoc = glGetAttribLocation(programId,"modelColor");
 	vertexNormalLoc = glGetAttribLocation(programId, "vertexNormal");
-	
+
 	modelMatrixLoc = glGetUniformLocation(programId,"modelMatrix");
 	viewMatrixLoc = glGetUniformLocation(programId,"viewMatrix");
 	projectionMatrixLoc = glGetUniformLocation(programId,"projectionMatrix");
@@ -111,7 +116,8 @@ static void initShaders() {
 	keyMap['d'] = false;
 }
 
-static void displayFunc() 
+
+static void displayFunc()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -135,28 +141,33 @@ static void displayFunc()
 
 	glUseProgram(programId);
 
-	glUniform3f(cameraLoc, cameraX, 0, cameraZ);
+	glUniform3f(cameraLoc, cameraX, 0, cameraZ); //cmx 0 cmZ
 
 	glUniformMatrix4fv(projectionMatrixLoc, 1, true, projectionMatrix.values);
 	mIdentity(&viewMatrix);
 
-	rotateX(&viewMatrix, mouseDiffY * CAMERA_ROTATION_SPEED);
-	rotateY(&viewMatrix, mouseDiffX * CAMERA_ROTATION_SPEED);
 	translate(&viewMatrix, -cameraX, 0, -cameraZ);
 
 	glUniformMatrix4fv(viewMatrixLoc, 1, true, viewMatrix.values);
 
+
 	mIdentity(&modelMatrix);
-	glUniformMatrix4fv(modelMatrixLoc, 1, true, modelMatrix.values);
+
+	translate(&modelMatrix, 0, 0, -100);
+	rotateX(&modelMatrix, mouseDiffY * CAMERA_ROTATION_SPEED);
+	rotateY(&modelMatrix, mouseDiffX * CAMERA_ROTATION_SPEED);
+
 
 	glBindVertexArray(vertexArrayId);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferId[2]);
+	glUniformMatrix4fv(modelMatrixLoc, 1, true, modelMatrix.values);
+	
 	glDrawElements(GL_TRIANGLE_STRIP, indexes.size(), GL_UNSIGNED_INT, 0);
 
 	glutSwapBuffers();
 }
 
-static void reshapeFunc(int w, int h) 
+static void reshapeFunc(int w, int h)
 {
 	if(h == 0) h = 1;
 	glViewport(0, 0, w, h);
@@ -181,7 +192,7 @@ static void keyReleasedFunc(unsigned char key, int x, int y)
 }
 
 void onMouseMove(int x, int y)
-{	
+{
 	int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
 	int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
 
@@ -216,6 +227,8 @@ void onMouseMove(int x, int y)
 		glutWarpPointer(x, windowHeight - MARGIN);
 	}
 }
+
+
 
 static void createImage(Image img)
 {
@@ -322,10 +335,11 @@ int main(int argc, char **argv) {
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
 	initShaders();
-	
-	glutSetCursor(GLUT_CURSOR_NONE);
+
+	//glutSetCursor(GLUT_CURSOR_NONE);
 	glutPassiveMotionFunc(onMouseMove);
-	glutMotionFunc(onMouseMove);
+	//glutMotionFunc(mouseRotation);
+
 
 	createImage(img);
 

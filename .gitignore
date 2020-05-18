@@ -140,3 +140,5 @@ local.properties
 
 makefile
 image
+
+include/
